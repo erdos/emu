@@ -1,6 +1,7 @@
 (ns erdos.emu-test
   (:require [clojure.test :refer :all]
-            [erdos.emu :refer :all]))
+            [erdos.emu :refer :all]
+            [clojure.spec.alpha :as spec]))
 
 
 (deftest test-long
@@ -45,3 +46,31 @@
 
 (deftest test-topsort
   (is (= [1 2 3] (topsort {3 [2] 2 [1] 1 []}))))
+
+(deftest test-repeated-spec
+  (is (= {:count 3 :numbers [1 2 3]}
+         (spec/conform (repeated-spec :numbers integer?)
+                       [3 1 2 3])))
+  (is (= {:count 0}
+         (spec/conform (repeated-spec :numbers integer?)
+                       [0]))))
+
+(comment
+  (println :>>!0
+           (-> (repeated-spec :letters string?)
+               (spec/conform [7 "a" "b" "c" "d" "e" "f" "g"])))
+
+
+  (println :>>!1
+           (-> (spec/+ (repeated-spec :letters string?))
+               (spec/conform [3 "a" "b" "c" 2 "x" "y"])))
+
+  (println :>>!2
+           (-> (spec/+ (repeated-spec :numbers int?))
+               (spec/conform [3 11 12 13, 2 21 22])))
+
+  (println :>>!3
+           (-> (repeated-spec :test-count (repeated-spec :numbers int?))
+               (spec/conform [2, 5 11 12 13 14 15, 4 21 22 23 24])))
+
+  comment)

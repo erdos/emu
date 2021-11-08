@@ -1,4 +1,5 @@
-(ns erdos.emu)
+(ns erdos.emu
+  (:require [clojure.spec.alpha :as spec]))
 
 
 (defn ->long [s] (Long/parseLong (str s)))
@@ -7,10 +8,10 @@
 (defn add-edge [graph [a b]] (update graph a conj b))
 
 
-(defn merge-cluster [graph a b]
-  (let [c1 (graph a)
-        c2 (graph b)]
-    (into {} (for [[k v] graph] (if (= c2 v) [k c1] [k v])))))
+(defn merge-cluster [cluster a b]
+  (let [c1 (cluster a)
+        c2 (cluster b)]
+    (into {} (for [[k v] cluster] (if (= c2 v) [k c1] [k v])))))
 
 
 (defn clusters [graph]
@@ -49,5 +50,14 @@
      graph
      (for [[k v] graph :when (empty? v)] k)
      (count graph))))
+
+
+;; a regex spec that reads an integer n and then n elements conforming to f.
+(defmacro repeated-spec [kw f]
+  (assert (keyword? kw))
+  ;; (assert (spec? f))
+  `(spec/& (spec/cat :count int? ~kw (spec/* ~f))
+           (fn [x#] (= (:count x#) (count (~kw x#))))))
+
 
 :OK
