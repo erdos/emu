@@ -45,7 +45,9 @@
 
 
 (deftest test-topsort
-  (is (= [1 2 3] (topsort {3 [2] 2 [1] 1 []}))))
+  (is (= [1 2 3] (topsort {3 [2] 2 [1] 1 []})))
+  (is (empty? (topsort {})))
+  (is (= [1 2 3] (topsort {1 [] 2 [] 3 []}))))
 
 (deftest test-repeated-spec
   (is (= {:count 3 :numbers [1 2 3]}
