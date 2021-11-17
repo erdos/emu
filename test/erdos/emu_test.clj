@@ -49,6 +49,7 @@
   (is (empty? (topsort {})))
   (is (= [1 2 3] (topsort {1 [] 2 [] 3 []}))))
 
+
 (deftest test-repeated-spec
   (is (= {:count 3 :numbers [1 2 3]}
          (spec/conform (repeated-spec :numbers integer?)
@@ -56,6 +57,21 @@
   (is (= {:count 0}
          (spec/conform (repeated-spec :numbers integer?)
                        [0]))))
+
+(deftest test-proprity-queue
+  (let [pk (->PriorityQueue {:z 3 :y 2 :x 1 :v 2})]
+    (is (= 1 (get pk :x)))
+    (is (= 1 (:x pk)))
+    (is (= 1 (pk :x) (pk :x -1)))
+    (is (= [[:x 1] [:y 2] [:v 2] [:z 3]]
+           (seq pk)))
+    (is (= (str {:x 1 :y 2 :v 2 :z 3})
+           (str pk)))
+    (is (not (empty? pk)))
+    (is (= [:x 1] (first pk)))
+    (is (= [:z 3] (last pk)))
+    (let [pk2 (assoc pk :x 4)]
+      (is (= [[:y 2] [:v 2] [:z 3] [:x 4]] (seq pk2))))))
 
 (comment
   (println :>>!0

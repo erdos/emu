@@ -60,4 +60,43 @@
            (fn [x#] (= (:count x#) (count (~kw x#))))))
 
 
+(deftype PriorityQueue [elem->prio prio->elems]
+  java.lang.Object
+  (toString [this]
+    (str "{"
+         (->> (seq this)
+              (map (partial clojure.string/join " "))
+              (clojure.string/join ", " ))
+         "}"))
+
+  clojure.lang.IFn
+  (invoke [_ k] (elem->prio k))
+  (invoke [_ k d] (elem->prio k d))
+
+  clojure.lang.Associative
+  (containsKey [_ k] (contains? elem->prio k))
+  (entryAt [_ k] (get elem->prio k))
+  (assoc [_ elem prio] (new PriorityQueue
+                            (assoc elem->prio elem prio)
+                            (-> prio->elems
+                                (update (elem->prio elem) disj elem)
+                                (update prio conj elem))))
+
+  clojure.lang.Counted
+  (count [_ ] (count elem->prio))
+
+  clojure.lang.Seqable
+  (seq [_] (for [[k vs] prio->elems, v vs] [v k]))
+
+  clojure.lang.ILookup
+  (valAt [_ k] (get elem->prio k))
+  (valAt [_ k d] (get elem->prio k d)))
+
+(defn ->PriorityQueue [elem-to-prio]
+  (assert (map? elem-to-prio))
+  (let [prio->elems (into (sorted-map)
+                          (for [[prio elems] (group-by val elem-to-prio)]
+                            [prio (set (map key elems))]))]
+    (new PriorityQueue elem-to-prio prio->elems)))
+
 :OK
