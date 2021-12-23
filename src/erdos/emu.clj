@@ -52,6 +52,36 @@
      (count graph))))
 
 
+(defn dijkstra [f start end]
+  (loop [unvisited [start]
+         visited #{}
+         pq {start 0}
+         min-path {start []}]
+    (if (seq unvisited)
+      (let [n (apply min-key pq unvisited)]
+        (if (= n end)
+          {:end-cost (pq end)}
+          (let [unvisited (remove #{n} unvisited)
+                fs (f n)
+                [unvisited pq min-path]
+                (reduce-kv (fn [[unvisited pq] neighbor neighbor-cost]
+                             (if (contains? visited neighbor)
+                               [unvisited pq min-path]
+                               (if (or (nil? (pq neighbor))
+                                       (< (+ (pq n) neighbor-cost) (pq neighbor)))
+                                 [(conj unvisited neighbor)
+                                  (assoc pq neighbor (+ (pq n) neighbor-cost))
+                                  (assoc min-path neighbor (cons neighbor (min-path n)))]
+                                 [(conj unvisited neighbor) pq min-path])))
+                           [unvisited pq min-path]
+                           fs)]
+            (recur unvisited (conj visited n) pq min-path))))
+      {:costs pq
+       ;; :paths min-path
+       ;;:end-path (min-path end)
+       })))
+
+
 ;; a regex spec that reads an integer n and then n elements conforming to f.
 (defmacro repeated-spec [kw f]
   (assert (keyword? kw))

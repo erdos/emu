@@ -73,6 +73,12 @@
     (let [pk2 (assoc pk :x 4)]
       (is (= [[:y 2] [:v 2] [:z 3] [:x 4]] (seq pk2))))))
 
+
+(deftest test-dijkstra
+  (is (= 6 (:end-cost (dijkstra {:a {:b 1 :c 200} :b {:c 2 :d 100} :c {:d 3}} :a :d))))
+  (is (= 3 (:end-cost (dijkstra {:a {:b 1} :b {:a 1 :c 1} :c {:a 1 :d 1}} :a :d)))))
+
+
 (comment
   (println :>>!0
            (-> (repeated-spec :letters string?)
